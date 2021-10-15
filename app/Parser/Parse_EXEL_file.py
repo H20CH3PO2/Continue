@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 
 
-D1 = '01 Январь 2010 00:00'
+D1 = '01 Январь 2010 00:00' #Дата, от которой отсчитываем дни
 
 
 #Создание класса "задача"
@@ -17,18 +17,21 @@ class task(object):
 #Функция для подсчета кол-ва дней между 2 датами
 def days_between(d1: str, d2: str):
     '''Counts the number of days between 2 dates'''
+    
     month_list = {'Январь': 1, 'Февраль': 2, 'Март': 3, 'Апрель': 4, 'Май': 5, 'Июнь': 5,
                   'Июль': 7, 'Август': 8, 'Сентябрь': 9, 'Октябрь': 10, 'Ноябрь': 11, 'Декабрь': 12}
     d1 = str(d1.split(' ')[0]) + '-' + str(month_list[str(d1.split(' ')[1])]) + '-' + str(d1.split(' ')[2])
     d2 = str(d2.split(' ')[0]) + '-' + str(month_list[str(d2.split(' ')[1])]) + '-' + str(d2.split(' ')[2])
     d1 = datetime.strptime(d1, "%d-%m-%Y")
     d2 = datetime.strptime(d2, "%d-%m-%Y")
+    
     return abs((d2 - d1).days)
 
 
 #Функция парсинга файла с удалением пустых строк
 def parse_exel_to_csv(exelfile: pd.DataFrame, csv_filename=r'OC2021_IT_Data_ASE.csv'):
     '''Parses the file and removes blank lines'''
+    
     indexes_to_drop = []
     for i in range(exelfile.shape[0]):
         if pd.isna(exelfile.iloc[i]['Последователи']) and pd.isna(exelfile.iloc[i]['Предшественники']):
@@ -37,12 +40,14 @@ def parse_exel_to_csv(exelfile: pd.DataFrame, csv_filename=r'OC2021_IT_Data_ASE.
     df_sliced = exelfile.take(list(indexes_to_keep))
     df_sliced.to_csv(csv_filename, index=False, header=True)
     print('File converted!')
+    
     return 0
 
 
 #Функция, оставляющая только ID в задачах-наследниках/предшественниках
 def keep_only_id(task: task):
     '''Keep only numbers in AI followers and predecessors'''
+    
     #Убраем буквы в последователях
     followers = task.followers.split(';')
     followers_clear = []
@@ -58,6 +63,7 @@ def keep_only_id(task: task):
     #Получаем конечные значения последователя и предшественника без букв
     task.followers = ';'.join(followers_clear)
     task.predecessor = ';'.join(predecessors_clear)
+    
     return task
 
 
@@ -112,15 +118,16 @@ def add_branches_for_2_tasks(task1: task, task2: task):
 
 #Функция добавления связей для конкретных задач. Происходит путем перебора всех задач из файла: каждая задача
 #проверяется на наличие связей с конкретной задачей.
-def add_branches_for_tasks(csv_file: pd.DataFrame, IDs):
+def add_branches_for_tasks(csv_file: pd.DataFrame, indexes):
     '''Supplements tasks from the list ID with missing links'''
-    addition_array = []
+    
+    addition_array = [] #Список с обьектами ["задача", index задачи]
 
     #Добавление связей в tasks по id
-    for id in IDs:
-        id1 = str(csv_file.loc[id, 'ID'])
-        followers1 = str(csv_file.iloc[id]['Последователи'])
-        predecessors1 = str(csv_file.loc[id]['Предшественники'])
+    for i in indexes:
+        id1 = str(csv_file.loc[i, 'ID'])
+        followers1 = str(csv_file.iloc[i]['Последователи'])
+        predecessors1 = str(csv_file.loc[i]['Предшественники'])
         task1 = task(id1, followers1, predecessors1)
         for j in range(csv_file.shape[0]):
             id2 = str(csv_file.iloc[j]['ID'])
@@ -128,8 +135,8 @@ def add_branches_for_tasks(csv_file: pd.DataFrame, IDs):
             predecessors2 = str(csv_file.iloc[j]['Предшественники'])
             task2 = task(id2, followers2, predecessors2)
             task1 = add_branches_for_2_tasks(task1, task2)[0]
-            addition_array.append([task1, id])
-
+            addition_array.append([task1, i])
+            
     #Записть в файл полученных значений
     for one_task in addition_array:
         help_task = one_task[0]
@@ -143,6 +150,7 @@ def add_branches_for_tasks(csv_file: pd.DataFrame, IDs):
 #каждой. Алгоритмическая сложность O(n^2)
 def add_branches_for_all_tasks(csv_file: pd.DataFrame):
     '''Complements all tasks with missing links'''
+    
     for i in range(csv_file.shape[0]):
 
         #Создаем обьект task1
@@ -178,12 +186,12 @@ def branch_count(csv_file: pd.DataFrame):
     count = 0
     #2 Равносильные реализации, т.к. после добавления всех недостающих связей, кол-во связей последователей =  кол-во
     #связей предшественников
-    '''
-    for i in range(csv_file.shape[0]):
-        for j in range(len(str((csv_file.iloc[i]['Последователи'])).split(';'))):
-            if not(pd.isna(csv_file.iloc[i]['Последователи'])):
-                count += 1
-    '''
+    #
+    #for i in range(csv_file.shape[0]):
+    #    for j in range(len(str((csv_file.iloc[i]['Последователи'])).split(';'))):
+    #        if not(pd.isna(csv_file.iloc[i]['Последователи'])):
+    #            count += 1
+    
     for i in range(csv_file.shape[0]):
         if not(pd.isna(csv_file.iloc[i]['Последователи'])):
             count += len(str((csv_file.iloc[i]['Последователи'])).split(';'))
@@ -195,12 +203,14 @@ def branch_count(csv_file: pd.DataFrame):
 #Функция, разделяющая последователя/предка на номер задачи и тип связи
 def splitting_task(task: str):
     '''Distributes follower/predecessor to issue number and link type'''
+    
     branch_number = {
         'ОН': '1',
         'НН': '2',
         'ОО': '3',
         'НО': '4',
-    }
+    } #Виды связей
+    
     task_type = ''.join(filter(str.isalpha, task))
 
     #Если в задаче присутствует тип связи
@@ -216,9 +226,10 @@ def splitting_task(task: str):
     return clear_task, branch_number[task_type]
 
 
-#Функция для создания вспомогательного файла input_rebs.txt (описан в main.py)
+#Функция для создания вспомогательного файла input_rebs.txt (описан в algorythm.py)
 def create_input_rebs(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_rebs.txt'):
     '''Create input_rebs.txt'''
+    
     txt_file = open(txt_filename, 'w')
 
     txt_file.write(str(csv_file.shape[0]))
@@ -232,15 +243,17 @@ def create_input_rebs(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_re
                 txt_file.write(str(csv_file.iloc[i]['ID']) + ' ')
                 txt_file.write(task_clear + ' ')
                 txt_file.write(branch_number + '\n')
-
+                
     txt_file.close()
+    
     return 0
 
 
-#Функция для создания вспомогательного файла input_tasks.txt (описан в main.py)
+#Функция для создания вспомогательного файла input_tasks.txt (описан в algorythm.py)
 def create_input_tasks(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_tasks.txt'):
     '''Create input_tasks.txt'''
-    global D1
+    
+    global D1 
     txt_file = open(txt_filename, 'w')
 
     txt_file.write(str(csv_file.shape[0]) + '\n')
@@ -268,13 +281,16 @@ def create_input_tasks(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_t
             txt_file.write(time_of_task + ' ')
 
             txt_file.write(str(csv_file.iloc[i]['Длительность'])[:-1:] + '\n')
+            
     txt_file.close()
+    
     return 0
 
 
 #Функция удаления пустых задач (которые есть в наследниках или в предшественниках, но у которых нет отдельной строки)
 def delete_empty_task(csv_file: pd.DataFrame):
     '''Removes tasks that do not have a separate line'''
+    
     id_list = [] #список ID со всеми задачами, которые имеют свою строку
 
     for i in range(csv_file.shape[0]):
@@ -295,7 +311,9 @@ def delete_empty_task(csv_file: pd.DataFrame):
                 if not (splitting_task(predecessor)[0] in id_list):
                     predecessors.remove(predecessor)
                     csv_file.at[i, 'Предшественники'] = ';'.join(predecessors)
+                    
     csv_file.to_csv(r'app/Parser/OC2021_IT_Data_ASE.csv', index=False, header=True)
+    
     return csv_file
 
 
@@ -303,6 +321,7 @@ def delete_empty_task(csv_file: pd.DataFrame):
 #наследников и предшественников
 def add_all_missing_branches_in_file(csv_file: pd.DataFrame, csv_filename=r'app/Parser/OC2021_IT_Data_ASE.csv'):
     '''Detects tasks whose predecessors have "..." at the end and complements them'''
+    
     incomplete_lists = [] #Список со всеми ID строк, у которых обнаружено "..."
 
     for i in range(csv_file.shape[0]):
@@ -322,6 +341,7 @@ def add_all_missing_branches_in_file(csv_file: pd.DataFrame, csv_filename=r'app/
     #Добавляем связи по списку
     add_branches_for_tasks(csv_file, incomplete_lists)
     csv_file.to_csv(csv_filename, index=False, header=True)
+    
     return csv_file
 
 
@@ -331,12 +351,15 @@ def correct_file(csv_file: pd.DataFrame, filename=r'OC2021_IT_Data_ASE.csv'):
     csv_file.to_csv(filename, index=False, header=True)
     csv_file = delete_empty_task(csv_file)
     csv_file.to_csv(filename, index=False, header=True)
+    
+    return 0
 
 
 #Функция создания всех вспомогательных файлов
 def create_supporting_files(csv_file: pd.DataFrame):
     create_input_rebs(csv_file)
     create_input_tasks(csv_file)
+    
     return 0
 
 
