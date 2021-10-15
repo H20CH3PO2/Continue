@@ -1,0 +1,28 @@
+.body{
+    margin: 0;
+    font-family: Inter, serif;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    height: 0;
+}
+
+.chart{
+    background: none;
+}
+
+.info{
+    background: none;
+}
+.title{
+    text-align: center;
+}
+
+.value{
+    font-size: 48px;
+    background: -webkit-linear-gradient(#0076AA, #25B2AF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-top: 0;
+}
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Критические задачи</title>
+    <link href="../static/main.css?v=2" rel="stylesheet">
+</head>
+<body>
+    <div class="body">
+        <div class="chart">
+            <table>
+                <tr style="font-weight: bold">
+                    <th>ID задачи</th>
+                    <th>Начало</th>
+                    <th>Окончание(Изначальное)</th>
+                    <th>Окончание(Рекомендуемое)</th>
+                </tr>
+                {%for task in file.data%}
+                <tr>
+                    <th>{{task.id}}</th>
+                    <th>{{task.start}}</th>
+                    <th>{{task.end}}</th>
+                    <th>{{task.rec_end}}</th>
+                </tr>
+                {%endfor%}
+            </table>
+        </div>
+        <div class="info">
+            <div class="fine">
+                <h1 class="title">ШТРАФ<br></h1>
+                <h3 class="value">{{file.fine}}</h3>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

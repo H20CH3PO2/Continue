@@ -217,7 +217,7 @@ def splitting_task(task: str):
 
 
 #Функция для создания вспомогательного файла input_rebs.txt (описан в main.py)
-def create_input_rebs(csv_file: pd.DataFrame, txt_filename='input_rebs.txt'):
+def create_input_rebs(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_rebs.txt'):
     '''Create input_rebs.txt'''
     txt_file = open(txt_filename, 'w')
 
@@ -238,7 +238,7 @@ def create_input_rebs(csv_file: pd.DataFrame, txt_filename='input_rebs.txt'):
 
 
 #Функция для создания вспомогательного файла input_tasks.txt (описан в main.py)
-def create_input_tasks(csv_file: pd.DataFrame, txt_filename='input_tasks.txt'):
+def create_input_tasks(csv_file: pd.DataFrame, txt_filename=r'app/Parser/input_tasks.txt'):
     '''Create input_tasks.txt'''
     global D1
     txt_file = open(txt_filename, 'w')
@@ -295,13 +295,13 @@ def delete_empty_task(csv_file: pd.DataFrame):
                 if not (splitting_task(predecessor)[0] in id_list):
                     predecessors.remove(predecessor)
                     csv_file.at[i, 'Предшественники'] = ';'.join(predecessors)
-    csv_file.to_csv(r'OC2021_IT_Data_ASE.csv', index=False, header=True)
+    csv_file.to_csv(r'app/Parser/OC2021_IT_Data_ASE.csv', index=False, header=True)
     return csv_file
 
 
 #Функция для обнаружения задач, которым нужно дополнить наследников или предшественников, и добавления в них недостающих
 #наследников и предшественников
-def add_all_missing_branches_in_file(csv_file: pd.DataFrame, csv_filename=r'OC2021_IT_Data_ASE.csv'):
+def add_all_missing_branches_in_file(csv_file: pd.DataFrame, csv_filename=r'app/Parser/OC2021_IT_Data_ASE.csv'):
     '''Detects tasks whose predecessors have "..." at the end and complements them'''
     incomplete_lists = [] #Список со всеми ID строк, у которых обнаружено "..."
 
@@ -340,13 +340,13 @@ def create_supporting_files(csv_file: pd.DataFrame):
     return 0
 
 
-exelfile = pd.read_excel(r'OC2021_IT_Data_ASE.xlsx', dtype={'ID': int,
+exelfile = pd.read_excel(r'app/Parser/OC2021_IT_Data_ASE.xlsx', dtype={'ID': int,
                                                             'Начало': str,
                                                             'Длительность': str,
                                                             'Окончание': str,
                                                             'Последователи': str,
                                                             'Предшественники': str})
-csv_file = pd.read_csv(r'OC2021_IT_Data_ASE.csv')
+csv_file = pd.read_csv(r'app/Parser/OC2021_IT_Data_ASE.csv')
 
 
 #parse_exel_to_csv(exelfile)
